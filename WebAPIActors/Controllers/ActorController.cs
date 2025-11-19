@@ -19,15 +19,15 @@ namespace WebAPIActors.Controllers
         {
             if (id <= 0)
                 return BadRequest("Id non valido. Deve essere > 0");
-            
+
             var actor = DatabaseHelper.GetActorById(id);
 
-            if(actor == null)
+            if (actor == null)
                 return NotFound();
 
             return actor;
         }
-        [HttpGet("research", Name ="FindActor")]
+        [HttpGet("research", Name = "FindActor")]
         public ActionResult<List<Actor>> FindActor(string research)
         {
             if (research == null)
@@ -35,7 +35,7 @@ namespace WebAPIActors.Controllers
 
             var actors = DatabaseHelper.FindActor(research);
 
-            if(actors== null || actors.Count == 0)
+            if (actors == null || actors.Count == 0)
                 return NotFound();
             return actors;
         }
@@ -54,6 +54,35 @@ namespace WebAPIActors.Controllers
                 return BadRequest("Non può aver fatto meno di 0 film");
 
             return DatabaseHelper.Insert(actor);
+        }
+
+        [HttpPut("{id}", Name = "ModifyActor")]
+        public ActionResult<bool> ModifyActor(int id, Actor actor)
+        {
+            if (id <= 0)
+                return BadRequest("Id non valido");
+
+            var test = DatabaseHelper.GetActorById(id);
+            if (test == null)
+                return NotFound();
+
+            bool result = false;
+
+            test.Name = actor.Name;
+            test.Surname = actor.Surname;
+            test.ImgUrl = actor.ImgUrl;
+            test.Nation = actor.Nation;
+            test.FilmQuantity = actor.FilmQuantity;
+            test.FilmCachet = actor.FilmCachet;
+            
+            if (ModelState.IsValid)
+            {
+                test.Id = id;
+
+                result = DatabaseHelper.Update(test);
+            }
+
+            return result;
         }
     }
 }
