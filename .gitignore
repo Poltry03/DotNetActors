@@ -1,6 +1,9 @@
-﻿.vs/
+.vs/
 
 
 appsetting.json
 
 WebAPIActors/obj/Debug/*
+
+**/obj/
+**/bin/
