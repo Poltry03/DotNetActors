@@ -22,6 +22,33 @@
   },
   {
     "ContainingType": "WebAPIActors.Controllers.ActorController",
+    "Method": "AddActor",
+    "RelativePath": "Actor",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "actor",
+        "Type": "WebAPIActors.Models.Actor",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Int32",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ],
+    "EndpointName": "AddActor"
+  },
+  {
+    "ContainingType": "WebAPIActors.Controllers.ActorController",
     "Method": "GetActor",
     "RelativePath": "Actor/{id}",
     "HttpMethod": "GET",
@@ -46,33 +73,6 @@
       }
     ],
     "EndpointName": "GetOneActor"
-  },
-  {
-    "ContainingType": "WebAPIActors.Controllers.ActorController",
-    "Method": "AddActor",
-    "RelativePath": "Actor/new",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "actor",
-        "Type": "WebAPIActors.Models.Actor",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "System.Int32",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ],
-    "EndpointName": "AddActor"
   },
   {
     "ContainingType": "WebAPIActors.Controllers.ActorController",

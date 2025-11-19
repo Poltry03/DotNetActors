@@ -1,1 +1,1 @@
-wwwroot\client.html
+wwwroot\client-actors.html

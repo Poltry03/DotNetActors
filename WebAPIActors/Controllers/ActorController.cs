@@ -39,7 +39,7 @@ namespace WebAPIActors.Controllers
                 return NotFound();
             return actors;
         }
-        [HttpPost("new", Name = "AddActor")]
+        [HttpPost("", Name = "AddActor")]
         public ActionResult<int> AddActor(Actor actor)
         {
             if (actor == null ||

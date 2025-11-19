@@ -67,7 +67,7 @@ namespace WebAPIActors.Helper
                 using (var connection = new MySqlConnection(ConnectionString))
                 {
                     var sql = "INSERT INTO actor (Name, Surname, nation, filmquantity, filmcachet, imgurl)" +
-                        " VALUES (@Name, @Surname, @Nation, @FilmQuantity, @FilmCachet, @ImgUrl; " +
+                        " VALUES (@Name, @Surname, @Nation, @FilmQuantity, @FilmCachet, @ImgUrl); " +
                         "SELECT LAST_INSERT_ID();";
                     var id = connection.ExecuteScalar<int>(sql, attore);
                     return id;

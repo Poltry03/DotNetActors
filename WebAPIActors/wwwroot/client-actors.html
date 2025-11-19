@@ -99,14 +99,14 @@
 
     <!-- APP JS -->
     <script>
-        const apiBase = "/api/actor";
+        const apiBase = "/actor";
 
         // ======================
         // CARICAMENTO ATTORI
         // ======================
         function loadActors(search = "") {
 
-            const url = search ? `${apiBase}/search?text=${encodeURIComponent(search)}` : apiBase;
+            const url = search ? `${apiBase}/research?text=${encodeURIComponent(search)}` : apiBase;
 
             $.get(url, function (actors) {
                 renderActors(actors);
@@ -129,13 +129,13 @@
                 container.append(`
                     <div class="col-md-4">
                         <div class="card h-100 shadow-sm">
-                            <img src="${actor.immagineUrl || 'https://via.placeholder.com/300x200?text=No+Image'}"
+                            <img src="${actor.imgUrl || 'https://via.placeholder.com/300x200?text=No+Image'}"
                                  class="card-img-top">
 
                             <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">${actor.nome} ${actor.cognome}</h5>
-                                <p class="card-text text-muted">${actor.nazionalità || ""}</p>
-                                <p class="card-text small">numero film : ${actor.numeroFilm || ""}, parcella per film : ${actor.parcellaPerFilm || 0} $</p>
+                                <h5 class="card-title">${actor.name} ${actor.surname}</h5>
+                                <p class="card-text text-muted">${actor.nation || ""}</p>
+                                <p class="card-text small">numero film : ${actor.filmQuantity || ""}, parcella per film : ${actor.filmCachet || 0} $</p>
 
                                 <div class="mt-auto">
                                     <button class="btn btn-warning btn-sm w-100 mb-2"
@@ -166,12 +166,12 @@
         function openEditModal(actor) {
             $("#modalTitle").text("Modifica Attore");
             $("#actorId").val(actor.id);
-            $("#actorNome").val(actor.nome);
-            $("#actorCognome").val(actor.cognome);
-            $("#actorNazionalita").val(actor.nazionalità);
-            $("#actorNumeroFilm").val(actor.numeroFilm);
-            $("#actorParcellaPerFilm").val(actor.parcellaPerFilm);
-            $("#actorImmagineUrl").val(actor.immagineUrl);
+            $("#actorNome").val(actor.name);
+            $("#actorCognome").val(actor.surname);
+            $("#actorNazionalita").val(actor.nation);
+            $("#actorNumeroFilm").val(actor.filmQuantity);
+            $("#actorParcellaPerFilm").val(actor.filmCachet);
+            $("#actorImmagineUrl").val(actor.imgUrl);
 
             new bootstrap.Modal(document.getElementById("actorModal")).show();
         }
@@ -183,12 +183,12 @@
             const id = $("#actorId").val();
 
             const data = {
-                nome: $("#actorNome").val(),
-                cognome: $("#actorCognome").val(),
-                nazionalità: $("#actorNazionalita").val(),
-                numeroFilm: $("#actorNumeroFilm").val(),
-                parcellaPerFilm: $("#actorParcellaPerFilm").val(),
-                immagineUrl: $("#actorImmagineUrl").val()
+                name: $("#actorNome").val(),
+                surname: $("#actorCognome").val(),
+                nation: $("#actorNazionalita").val(),
+                filmQuantity: $("#actorNumeroFilm").val(),
+                filmCachet: $("#actorParcellaPerFilm").val(),
+                imgUrl: $("#actorImmagineUrl").val()
             };
 
             if (id) {
