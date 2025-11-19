@@ -11,7 +11,7 @@ namespace WebAPIActors.Controllers
         [HttpGet(Name = "GetAllActors")]
         public List<Actor> GetAllActors()
         {
-            return DatabaseHelper.GetAllActors();
+            return ActorHelper.GetAllActors();
         }
 
         [HttpGet("{id}", Name = "GetOneActor")]
@@ -20,7 +20,7 @@ namespace WebAPIActors.Controllers
             if (id <= 0)
                 return BadRequest("Id non valido. Deve essere > 0");
 
-            var actor = DatabaseHelper.GetActorById(id);
+            var actor = ActorHelper.GetActorById(id);
 
             if (actor == null)
                 return NotFound();
@@ -33,7 +33,7 @@ namespace WebAPIActors.Controllers
             if (research == null)
                 return BadRequest("Inserisci un dato");
 
-            var actors = DatabaseHelper.FindActor(research);
+            var actors = ActorHelper.FindActor(research);
 
             if (actors == null || actors.Count == 0)
                 return NotFound();
@@ -53,7 +53,7 @@ namespace WebAPIActors.Controllers
             if (actor.FilmQuantity <= 0)
                 return BadRequest("Non può aver fatto meno di 0 film");
 
-            return DatabaseHelper.Insert(actor);
+            return ActorHelper.Insert(actor);
         }
 
         [HttpPut("{id}", Name = "ModifyActor")]
@@ -62,7 +62,7 @@ namespace WebAPIActors.Controllers
             if (id <= 0)
                 return BadRequest("Id non valido");
 
-            var test = DatabaseHelper.GetActorById(id);
+            var test = ActorHelper.GetActorById(id);
             if (test == null)
                 return NotFound();
 
@@ -74,15 +74,32 @@ namespace WebAPIActors.Controllers
             test.Nation = actor.Nation;
             test.FilmQuantity = actor.FilmQuantity;
             test.FilmCachet = actor.FilmCachet;
-            
+
             if (ModelState.IsValid)
             {
                 test.Id = id;
 
-                result = DatabaseHelper.Update(test);
+                result = ActorHelper.Update(test);
             }
 
             return result;
+        }
+
+        [HttpDelete("{id}", Name = "DeleteActor")]
+        public ActionResult DeleteActor(int id)
+        {
+            if (id <= 0)
+                return BadRequest("Id non valido");
+
+            var test = ActorHelper.GetActorById(id);
+            if (test == null)
+                return NotFound();
+
+            bool result = ActorHelper.Delete(test.Id);
+
+            if (!result)
+                return StatusCode(500, "Riprova dopo");
+            return NoContent();
         }
     }
 }
