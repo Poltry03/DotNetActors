@@ -26,5 +26,26 @@ namespace WebAPIActors.Controllers
                 return Unauthorized();
         }
 
+        [HttpPost("new", Name = "CreateUser")]
+        public ActionResult NewUser(User user)
+        {
+            if (string.IsNullOrEmpty(user.Username))
+                return BadRequest("Username necessario");
+
+            if (string.IsNullOrEmpty(user.Password))
+                return BadRequest("Password necessaria");
+
+            var existingUser = UserHelper.GetUserByUsername(user.Username);
+            if (existingUser == null)
+                return BadRequest("Utente già inserito");
+
+            int result = UserHelper.Insert(user);            
+
+            if (result != 0)
+                return NoContent();
+            else
+                return StatusCode(500, "Qualcosa è andato storto");           
+        }
+
     }
 }
