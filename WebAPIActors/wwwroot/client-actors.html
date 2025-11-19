@@ -1,0 +1,248 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actors Management</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+
+<body class="bg-light">
+
+    <div class="container py-4">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Actors</h2>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actorModal" onclick="openAddModal()">
+                + Nuovo Attore
+            </button>
+        </div>
+
+        <!-- Search -->
+        <form id="searchForm" class="input-group mb-4">
+            <input type="text" id="searchText" class="form-control" placeholder="Cerca attore per nome…">
+            <button class="btn btn-primary" type="submit">Cerca</button>
+        </form>
+
+        <!-- Cards -->
+        <div id="actorsContainer" class="row g-4">
+            <!-- render dinamico -->
+        </div>
+    </div>
+
+
+    <!-- MODAL Aggiunta/Modifica -->
+    <div class="modal fade" id="actorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Nuovo Attore</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="actorForm">
+                        <input type="hidden" id="actorId">
+
+                        <div class="mb-3">
+                            <label class="form-label">Nome</label>
+                            <input type="text" id="actorNome" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Cognome</label>
+                            <input type="text" id="actorCognome" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nazionalità</label>
+                            <input type="text" id="actorNazionalita" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Numero film</label>
+                            <input id="actorNumeroFilm" class="form-control" type="number"></input>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Parcella per film</label>
+                            <input id="actorParcellaPerFilm" class="form-control" type="number"></input>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">URL Immagine</label>
+                            <input type="text" id="actorImmagineUrl" class="form-control">
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button class="btn btn-primary" onclick="saveActor()">Salva</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <!-- APP JS -->
+    <script>
+        const apiBase = "/api/actor";
+
+        // ======================
+        // CARICAMENTO ATTORI
+        // ======================
+        function loadActors(search = "") {
+
+            const url = search ? `${apiBase}/search?text=${encodeURIComponent(search)}` : apiBase;
+
+            $.get(url, function (actors) {
+                renderActors(actors);
+            });
+        }
+
+        // ======================
+        // RENDER CARDS
+        // ======================
+        function renderActors(actors) {
+            const container = $("#actorsContainer");
+            container.empty();
+
+            if (!actors.length) {
+                container.html(`<p class="text-center text-muted">Nessun attore trovato.</p>`);
+                return;
+            }
+
+            actors.forEach(actor => {
+                container.append(`
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="${actor.immagineUrl || 'https://via.placeholder.com/300x200?text=No+Image'}"
+                                 class="card-img-top">
+
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">${actor.nome} ${actor.cognome}</h5>
+                                <p class="card-text text-muted">${actor.nazionalità || ""}</p>
+                                <p class="card-text small">numero film : ${actor.numeroFilm || ""}, parcella per film : ${actor.parcellaPerFilm || 0} $</p>
+
+                                <div class="mt-auto">
+                                    <button class="btn btn-warning btn-sm w-100 mb-2"
+                                        onclick='openEditModal(${JSON.stringify(actor)})'>Modifica</button>
+
+                                    <button class="btn btn-danger btn-sm w-100"
+                                        onclick="deleteActor(${actor.id})">Elimina</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        // ======================
+        // AGGIUNTA
+        // ======================
+        function openAddModal() {
+            $("#modalTitle").text("Nuovo Attore");
+            $("#actorForm")[0].reset();
+            $("#actorId").val("");
+        }
+
+        // ======================
+        // MODIFICA
+        // ======================
+        function openEditModal(actor) {
+            $("#modalTitle").text("Modifica Attore");
+            $("#actorId").val(actor.id);
+            $("#actorNome").val(actor.nome);
+            $("#actorCognome").val(actor.cognome);
+            $("#actorNazionalita").val(actor.nazionalità);
+            $("#actorNumeroFilm").val(actor.numeroFilm);
+            $("#actorParcellaPerFilm").val(actor.parcellaPerFilm);
+            $("#actorImmagineUrl").val(actor.immagineUrl);
+
+            new bootstrap.Modal(document.getElementById("actorModal")).show();
+        }
+
+        // ======================
+        // SALVA (POST o PUT)
+        // ======================
+        function saveActor() {
+            const id = $("#actorId").val();
+
+            const data = {
+                nome: $("#actorNome").val(),
+                cognome: $("#actorCognome").val(),
+                nazionalità: $("#actorNazionalita").val(),
+                numeroFilm: $("#actorNumeroFilm").val(),
+                parcellaPerFilm: $("#actorParcellaPerFilm").val(),
+                immagineUrl: $("#actorImmagineUrl").val()
+            };
+
+            if (id) {
+                // PUT
+                $.ajax({
+                    url: `${apiBase}/${id}`,
+                    method: "PUT",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: () => {
+                        bootstrap.Modal.getInstance(document.getElementById("actorModal")).hide();
+                        loadActors();
+                    }
+                });
+
+            } else {
+                // POST
+                $.ajax({
+                    url: apiBase,
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: () => {
+                        bootstrap.Modal.getInstance(document.getElementById("actorModal")).hide();
+                        loadActors();
+                    }
+                });
+            }
+        }
+
+        // ======================
+        // DELETE
+        // ======================
+        function deleteActor(id) {
+            if (!confirm("Vuoi davvero eliminare questo attore?")) return;
+
+            $.ajax({
+                url: `${apiBase}/${id}`,
+                method: "DELETE",
+                success: () => loadActors()
+            });
+        }
+
+        // ======================
+        // SEARCH
+        // ======================
+        $("#searchForm").on("submit", function (e) {
+            e.preventDefault();
+            loadActors($("#searchText").val().trim());
+        });
+
+        // LOAD iniziale
+        loadActors();
+    </script>
+
+</body>
+</html>
