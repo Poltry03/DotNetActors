@@ -19,7 +19,7 @@ namespace WebAPIActors.Controllers
             var loggedUser = UserHelper.LoginTry(user.Username, user.Password);
             if (loggedUser != null)
             {
-                var token = "faketoken";
+                var token = JwtHelper.GenerateToken(loggedUser);
                 return Ok(new { token = token, name = loggedUser.Username });
             }
             else

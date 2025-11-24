@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebAPIActors.Attributes;
 using WebAPIActors.Helper;
 using WebAPIActors.Models;
 
@@ -39,6 +40,8 @@ namespace WebAPIActors.Controllers
                 return NotFound();
             return actors;
         }
+
+        [JwtAuth]
         [HttpPost("", Name = "AddActor")]
         public ActionResult<int> AddActor(Actor actor)
         {
@@ -56,6 +59,7 @@ namespace WebAPIActors.Controllers
             return ActorHelper.Insert(actor);
         }
 
+        [JwtAuth]
         [HttpPut("{id}", Name = "ModifyActor")]
         public ActionResult<bool> ModifyActor(int id, Actor actor)
         {
@@ -85,6 +89,7 @@ namespace WebAPIActors.Controllers
             return result;
         }
 
+        [JwtAuth]
         [HttpDelete("{id}", Name = "DeleteActor")]
         public ActionResult DeleteActor(int id)
         {
