@@ -14,7 +14,7 @@ namespace WebAPIActors.Controllers
             if (string.IsNullOrWhiteSpace(user.Username) || string.IsNullOrEmpty(user.Password))
             {
                 return BadRequest();
-            }   
+            }
 
             var loggedUser = UserHelper.LoginTry(user.Username, user.Password);
             if (loggedUser != null)
@@ -44,12 +44,12 @@ namespace WebAPIActors.Controllers
             user.Salt = PasswordHelper.GenerateSalt();
             user.PasswordHash = PasswordHelper.HashPassword(user.Password, user.Salt);
 
-            int result = UserHelper.Insert(user);            
+            int result = UserHelper.Insert(user);
 
             if (result != 0)
                 return NoContent();
             else
-                return StatusCode(500, "Qualcosa è andato storto");           
+                return StatusCode(500, "Qualcosa è andato storto");
         }
 
     }
