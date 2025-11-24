@@ -11,7 +11,7 @@ namespace WebAPIActors.Controllers
         [HttpPost("/api/login", Name = "Login")]
         public ActionResult Login(User user)
         {
-            if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password))
+            if (string.IsNullOrWhiteSpace(user.Username) || string.IsNullOrEmpty(user.Password))
             {
                 return BadRequest();
             }   
@@ -36,8 +36,13 @@ namespace WebAPIActors.Controllers
                 return BadRequest("Password necessaria");
 
             var existingUser = UserHelper.GetUserByUsername(user.Username);
-            if (existingUser == null)
+
+
+            if (existingUser != null)
                 return BadRequest("Utente già inserito");
+
+            user.Salt = PasswordHelper.GenerateSalt();
+            user.PasswordHash = PasswordHelper.HashPassword(user.Password, user.Salt);
 
             int result = UserHelper.Insert(user);            
 

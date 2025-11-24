@@ -22,19 +22,29 @@ namespace WebAPIActors.Helper
                 foundUser = connection.QueryFirst<User>(sql, new { Username = username});
             }
 
-            if (foundUser.Password == password)
+            var passwordHash = PasswordHelper.HashPassword(password, foundUser.Salt);
+
+            if (foundUser.PasswordHash == passwordHash)
                 return foundUser;
+
             return null;
         }
 
         internal static User GetUserByUsername(string username)
         {
-            using (var connection = new MySqlConnection(ConnectionString))
+            try
             {
-                var sql = "SELECT * FROM user " +
-                    "WHERE username = @Username";
-                var foundUser = connection.QueryFirst<User>(sql, new { Username = username });
-                return foundUser;
+                using (var connection = new MySqlConnection(ConnectionString))
+                {
+                    var sql = "SELECT * FROM user " +
+                        "WHERE username = @Username";
+                    var foundUser = connection.QueryFirst<User>(sql, new { Username = username });
+                    return foundUser;
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;
             }
         }
 
@@ -44,8 +54,8 @@ namespace WebAPIActors.Helper
             {
                 using (var connection = new MySqlConnection(ConnectionString))
                 {
-                    var sql = "INSERT INTO user (Usernameame, Password)" +
-                        " VALUES (@Username, @Password); " +
+                    var sql = "INSERT INTO user (Username, PasswordHash, Salt)" +
+                        " VALUES (@Username, @PasswordHash, @Salt); " +
                         "SELECT LAST_INSERT_ID();";
                     var id = connection.ExecuteScalar<int>(sql, user);
                     return id;
