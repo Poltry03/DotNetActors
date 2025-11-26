@@ -84,33 +84,33 @@
                             <input type="hidden" id="actorId">
 
                             <div class="mb-3">
-                                <label class="form-label">Nome</label>
+                                <label class="form-label">Nome *</label>
                                 <input type="text" id="actorNome" class="form-control" required>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Cognome</label>
+                                <label class="form-label">Cognome *</label>
                                 <input type="text" id="actorCognome" class="form-control" required>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Nazionalità</label>
-                                <input type="text" id="actorNazionalita" class="form-control">
+                                <label class="form-label">Nazionalità *</label>
+                                <input type="text" id="actorNazionalita" class="form-control" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Numero film</label>
-                                <input id="actorNumeroFilm" class="form-control" type="number">
+                                <input id="actorNumeroFilm" class="form-control" type="number" min="0" value="0">
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Parcella per film</label>
-                                <input id="actorParcellaPerFilm" class="form-control" type="number">
+                                <label class="form-label">Parcella per film ($)</label>
+                                <input id="actorParcellaPerFilm" class="form-control" type="number" min="0" step="0.01" value="0">
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">URL Immagine</label>
-                                <input type="text" id="actorImmagineUrl" class="form-control">
+                                <label class="form-label">URL Immagine *</label>
+                                <input type="text" id="actorImmagineUrl" class="form-control" required>
                             </div>
                         </form>
                     </div>
@@ -208,14 +208,28 @@
         //   LOAD ACTORS
         // ------------------------------
         function loadActors(search = "") {
+            // CORRETTO: il backend usa "research" come nome del parametro
+            const url = search ? `${apiBase}/research?research=${encodeURIComponent(search)}` : apiBase;
 
-            const url = search ? `${apiBase}/research?text=${encodeURIComponent(search)}` : apiBase;
+            console.log("🔍 Caricamento attori da URL:", url);
+            console.log("🔑 Token JWT:", jwtToken ? "presente" : "MANCANTE");
 
             $.ajax({
                 url: url,
                 method: "GET",
                 headers: authHeaders(),
-                success: renderActors
+                success: function (data) {
+                    console.log("✅ Risposta ricevuta:", data);
+                    console.log("📊 Tipo di dato:", typeof data);
+                    console.log("📏 Lunghezza array:", Array.isArray(data) ? data.length : "Non è un array");
+                    renderActors(data);
+                },
+                error: function (err) {
+                    console.error("❌ Errore caricamento attori:", err);
+                    console.error("Status:", err.status);
+                    console.error("Response:", err.responseText);
+                    $("#actorsContainer").html(`<p class="text-center text-danger">Errore nel caricamento degli attori (${err.status})</p>`);
+                }
             });
         }
 
@@ -223,38 +237,65 @@
         //   RENDER
         // ------------------------------
         function renderActors(actors) {
+            console.log("🎨 Inizio rendering con dati:", actors);
+
             const container = $("#actorsContainer");
             container.empty();
 
-            if (!actors.length) {
+            if (!actors || !actors.length) {
+                console.warn("⚠️ Nessun attore da visualizzare");
                 container.html(`<p class="text-center text-muted">Nessun attore trovato.</p>`);
                 return;
             }
 
-            actors.forEach(actor => {
+            console.log(`✨ Rendering di ${actors.length} attori`);
+
+            actors.forEach((actor, index) => {
+                console.log(`Attore ${index}:`, actor);
+
+                // CORRETTO: Il backend restituisce camelCase (minuscolo)
+                const imgUrl = actor.imgUrl || 'https://via.placeholder.com/300x200?text=No+Image';
+                const name = actor.name || '';
+                const surname = actor.surname || '';
+                const nation = actor.nation || 'Non specificata';
+                const filmQty = actor.filmQuantity || 0;
+                const cachet = actor.filmCachet || 0;
+                const id = actor.id;
+
                 container.append(`
-                        <div class="col-md-4">
-                            <div class="card h-100 shadow-sm">
-                                <img src="${actor.ImgUrl || 'https://via.placeholder.com/300x200?text=No+Image'}"
-                                     class="card-img-top">
+                            <div class="col-md-4">
+                                <div class="card h-100 shadow-sm">
+                                    <img src="${imgUrl}"
+                                         class="card-img-top"
+                                         alt="${name} ${surname}"
+                                         style="height: 250px; object-fit: cover;">
 
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">${actor.Name} ${actor.Surname}</h5>
-                                    <p class="card-text text-muted">${actor.Nation || ""}</p>
-                                    <p class="card-text small">Numero film: ${actor.FilmQuantity || ""} • Parcella: ${actor.FilmCachet || 0}$</p>
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">${name} ${surname}</h5>
+                                        <p class="card-text text-muted"><i class="bi bi-globe"></i> ${nation}</p>
+                                        <p class="card-text small">
+                                            <strong>Film:</strong> ${filmQty} •
+                                            <strong>Parcella:</strong> ${cachet.toLocaleString()}
+                                        </p>
 
-                                    <div class="mt-auto">
-                                        <button class="btn btn-warning btn-sm w-100 mb-2"
-                                            onclick='openEditModal(${JSON.stringify(actor)})'>Modifica</button>
+                                        <div class="mt-auto">
+                                            <button class="btn btn-warning btn-sm w-100 mb-2"
+                                                onclick='openEditModal(${JSON.stringify(actor).replace(/'/g, "&apos;")})'>
+                                                Modifica
+                                            </button>
 
-                                        <button class="btn btn-danger btn-sm w-100"
-                                            onclick="deleteActor(${actor.Id})">Elimina</button>
+                                            <button class="btn btn-danger btn-sm w-100"
+                                                onclick="deleteActor(${id})">
+                                                Elimina
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    `);
+                        `);
             });
+
+            console.log("✅ Rendering completato");
         }
 
 
@@ -269,13 +310,14 @@
 
         function openEditModal(actor) {
             $("#modalTitle").text("Modifica Attore");
+            // CORRETTO: usa camelCase (minuscolo)
             $("#actorId").val(actor.id);
-            $("#actorNome").val(actor.Name);
-            $("#actorCognome").val(actor.Surname);
-            $("#actorNazionalita").val(actor.Nation);
-            $("#actorNumeroFilm").val(actor.FilmQuantity);
-            $("#actorParcellaPerFilm").val(actor.FilmCachet);
-            $("#actorImmagineUrl").val(actor.ImgUrl);
+            $("#actorNome").val(actor.name);
+            $("#actorCognome").val(actor.surname);
+            $("#actorNazionalita").val(actor.nation);
+            $("#actorNumeroFilm").val(actor.filmQuantity);
+            $("#actorParcellaPerFilm").val(actor.filmCachet);
+            $("#actorImmagineUrl").val(actor.imgUrl);
 
             new bootstrap.Modal(document.getElementById("actorModal")).show();
         }
@@ -283,16 +325,34 @@
         function saveActor() {
             const id = $("#actorId").val();
 
+            // CORRETTO: il backend si aspetta nomi in inglese con maiuscola iniziale
             const data = {
-                nome: $("#actorNome").val(),
-                cognome: $("#actorCognome").val(),
-                nazionalità: $("#actorNazionalita").val(),
-                numeroFilm: $("#actorNumeroFilm").val(),
-                parcellaPerFilm: $("#actorParcellaPerFilm").val(),
-                immagineUrl: $("#actorImmagineUrl").val()
+                Name: $("#actorNome").val().trim(),
+                Surname: $("#actorCognome").val().trim(),
+                Nation: $("#actorNazionalita").val().trim(),
+                FilmQuantity: parseInt($("#actorNumeroFilm").val()) || 0,
+                FilmCachet: parseFloat($("#actorParcellaPerFilm").val()) || 0,
+                ImgUrl: $("#actorImmagineUrl").val().trim()
             };
 
+            // Validazione base
+            if (!data.Name || !data.Surname || !data.Nation || !data.ImgUrl) {
+                alert("I campi contrassegnati da * sono obbligatori");
+                return;
+            }
+
+            if (data.FilmCachet < 0) {
+                alert("Il valore del cachet non può essere negativo");
+                return;
+            }
+
+            if (data.FilmQuantity < 0) {
+                alert("Non può aver fatto meno di 0 film");
+                return;
+            }
+
             if (id) {
+                // UPDATE
                 $.ajax({
                     url: `${apiBase}/${id}`,
                     method: "PUT",
@@ -302,10 +362,15 @@
                     success: () => {
                         bootstrap.Modal.getInstance(document.getElementById("actorModal")).hide();
                         loadActors();
+                    },
+                    error: (err) => {
+                        console.error("Errore modifica:", err);
+                        alert("Errore durante la modifica dell'attore");
                     }
                 });
 
             } else {
+                // INSERT
                 $.ajax({
                     url: apiBase,
                     method: "POST",
@@ -315,6 +380,10 @@
                     success: () => {
                         bootstrap.Modal.getInstance(document.getElementById("actorModal")).hide();
                         loadActors();
+                    },
+                    error: (err) => {
+                        console.error("Errore inserimento:", err);
+                        alert("Errore durante l'inserimento dell'attore");
                     }
                 });
             }
@@ -330,7 +399,13 @@
                 url: `${apiBase}/${id}`,
                 method: "DELETE",
                 headers: authHeaders(),
-                success: () => loadActors()
+                success: () => {
+                    loadActors();
+                },
+                error: (err) => {
+                    console.error("Errore eliminazione:", err);
+                    alert("Errore durante l'eliminazione dell'attore");
+                }
             });
         }
 

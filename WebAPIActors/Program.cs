@@ -65,6 +65,7 @@ namespace WebAPIActors
             app.UseAuthorization();
 
             DatabaseHelper.ConnectionString = app.Configuration.GetConnectionString("ActorDB");
+            JwtHelper.SetJwtConfig(app.Configuration);
 
             app.MapControllers();
 

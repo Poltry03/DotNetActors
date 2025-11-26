@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebAPIActors.DTOs;
 using WebAPIActors.Helper;
 using WebAPIActors.Models;
 
@@ -9,7 +10,7 @@ namespace WebAPIActors.Controllers
     public class UserController : Controller
     {
         [HttpPost("/api/login", Name = "Login")]
-        public ActionResult Login(User user)
+        public ActionResult Login(LoginDto user)
         {
             if (string.IsNullOrWhiteSpace(user.Username) || string.IsNullOrEmpty(user.Password))
             {

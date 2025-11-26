@@ -5,6 +5,7 @@ using WebAPIActors.Models;
 
 namespace WebAPIActors.Controllers
 {
+    [JwtAuth]
     [ApiController]
     [Route("[controller]")]
     public class ActorController : Controller
