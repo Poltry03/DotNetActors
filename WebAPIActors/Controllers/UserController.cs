@@ -53,5 +53,56 @@ namespace WebAPIActors.Controllers
                 return StatusCode(500, "Qualcosa è andato storto");
         }
 
+        [HttpPost("reset", Name = "ResetUser")]
+        public ActionResult Reset(ResetDto reset)
+        {
+            //var token = JwtHelper.GenerateToken(resetUser + DateTime.Now.ToString);
+
+            if (string.IsNullOrWhiteSpace(reset.Username))
+            {
+                return BadRequest();
+            }
+
+            var existingUser = UserHelper.GetUserByUsername(reset.Username);
+
+            if (existingUser == null)
+                return BadRequest($"Unable to reset user {reset.Username}");
+
+
+            var token = "faketoken";
+
+            var url = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}";
+
+
+            return Ok($"reset?={token}");
+        }
+
+        [HttpPatch("reset", Name = "ChangePwd")]
+        public ActionResult ChangePwd(ChangePasswordDto change)
+        {
+
+            if (string.IsNullOrEmpty(change.ResetToken))
+                return BadRequest();
+
+            if (string.IsNullOrWhiteSpace(change.NewPassword))
+                return BadRequest();
+
+            var foundUser = UserHelper.GetUserByResetToken(change.ResetToken);
+
+            if (foundUser == null)
+                return BadRequest("Something went wrong");
+
+            foundUser.PasswordHash = PasswordHelper.HashPassword(change.NewPassword, foundUser.Salt);
+
+            bool result = UserHelper.Update(foundUser);
+
+            if (result)
+                return Ok();
+
+
+            return StatusCode(500, "Qaulcosa è andato storto");
+
+        }
+
     }
 }

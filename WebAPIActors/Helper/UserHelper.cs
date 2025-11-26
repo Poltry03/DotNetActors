@@ -30,6 +30,24 @@ namespace WebAPIActors.Helper
             return null;
         }
 
+        internal static User GetUserByResetToken(string token)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(ConnectionString))
+                {
+                    var sql = "SELECT * FROM user " +
+                        "WHERE resetToken = @ResetToken";
+                    User foundUser = connection.QueryFirst<User>(sql, new { ResetToken = token });
+                    return foundUser;
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
         internal static User GetUserByUsername(string username)
         {
             try
@@ -38,7 +56,7 @@ namespace WebAPIActors.Helper
                 {
                     var sql = "SELECT * FROM user " +
                         "WHERE username = @Username";
-                    var foundUser = connection.QueryFirst<User>(sql, new { Username = username });
+                    User foundUser = connection.QueryFirst<User>(sql, new { Username = username });
                     return foundUser;
                 }
             }
@@ -66,6 +84,29 @@ namespace WebAPIActors.Helper
                 Console.WriteLine(ex.Message);
                 //log error
                 return 0;
+            }
+        }
+
+        internal static bool Update(User user)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(ConnectionString))
+                {
+                    var sql = "UPDATE User " +
+                        "SET PasswordHash = @PasswordHash " +
+                        "WHERE ResetToken = @ResetToken; " +
+                        "UPDATE User " +
+                        "SET ResetToken = NULL " +
+                        "WHERE username = @Username;";
+                    connection.Execute(sql, user);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
             }
         }
     }
