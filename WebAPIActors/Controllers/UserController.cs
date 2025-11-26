@@ -71,10 +71,13 @@ namespace WebAPIActors.Controllers
 
             var token = "faketoken";
 
-            var url = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}";
+            if (!UserHelper.InsertResetToken(token, reset.Username))
+                return StatusCode(500, "Qaulcosa è andato storto");
+
+            var url = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}/reset.html?={token}";
 
 
-            return Ok($"reset?={token}");
+            return Ok( new { resetLink = url });
         }
 
         [HttpPatch("reset", Name = "ChangePwd")]

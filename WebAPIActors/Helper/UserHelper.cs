@@ -87,6 +87,26 @@ namespace WebAPIActors.Helper
             }
         }
 
+        internal static bool InsertResetToken(string token, string username)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(ConnectionString))
+                {
+                    var sql = "UPDATE User " +
+                        "SET ResetToken = @Token " +
+                        "WHERE Username = @Username;";
+                    connection.Execute(sql, new { Token = token, Username = username});
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
         internal static bool Update(User user)
         {
             try
